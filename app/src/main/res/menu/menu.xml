@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_levels"
+        android:icon="@drawable/ic_controls"
+        android:title="@string/select_level"
+        app:showAsAction="ifRoom">
+
+    </item>
+
+    <item
+        android:id="@+id/menu_reset"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="@string/reset_game"
+        app:showAsAction="ifRoom">
+    </item>
+
+
+</menu>

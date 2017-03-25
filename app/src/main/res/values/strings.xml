@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Maor\'s Pops</string>
+    <string name="add">add</string>
+    <string name="select_level">Select Level</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="game_over">Game Over</string>
+    <string name="start_again">Start again?</string>
+    <string name="reset_game">Reset Game</string>
+</resources>

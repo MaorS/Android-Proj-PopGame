@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewGroup[] vColumns = new ViewGroup[columns];
     private Util util;
     private SharedPreferences sp;
-    private int level;
+    private int level, perfectLines;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +74,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void handlePerfectLine(int index) {
+        perfectLines += 1;
+        for (int i = 0; i < columns; i++) {       //remove line
+            LinearLayout parent = (LinearLayout) mainActivity.getChildAt(i);
+            if (parent.getChildAt(parent.getChildCount() - index) == null) continue;// skip blank column
+            parent.removeViewAt(parent.getChildCount() - index);
+        }
+    }
+
+
     // when clicking on pop
     public void onClickPOP(View view) {
         // column of pop
@@ -81,22 +91,22 @@ public class MainActivity extends AppCompatActivity {
         // index of pop from bottom to top
         int index = parent.getChildCount() - parent.indexOfChild(view);
         // if 4 in row
-        if (isPerfectLine(index)) {
-            for (int i = 0; i < columns; i++) {       //remove line
-                parent = (LinearLayout) mainActivity.getChildAt(i);
-                parent.removeViewAt(parent.getChildCount() - index);
-            }
-        } else { //remove 1 candy
-            ((LinearLayout) view.getParent()).removeView(view);
-        }
+        if (isPerfectLine(index)) handlePerfectLine(index);
+        else ((LinearLayout) view.getParent()).removeView(view);//remove 1 pop
 
         // check if there is no more pops, show alert
         if (isGameOver()) {
+            String msg = "";
+            if (perfectLines > 0)
+                msg = "Bravo, You finished with " + perfectLines + " Perfect lines!\n";
+            msg += "Play Again?";
+
             new AlertDialog.Builder(this)
                     .setTitle(R.string.game_over)
-                    .setMessage(R.string.start_again)
+                    .setMessage(msg)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+                            clean();
                             startGame();
                         }
                     })
@@ -106,19 +116,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //Check that all items are the same (4 in row)
+    //Check that all items are the same (4 or more in row)
     private boolean isPerfectLine(int index) {
         int counter = 0; //counter for same color
         ColorFilter lastInt = new ColorFilter();
 
-        for (int i = 0; i < columns; i++) {
+        for (int i = 0; i < vColumns.length; i++) {
             LinearLayout parent = (LinearLayout) mainActivity.getChildAt(i);
             if (parent.getChildCount() - index < 0) break;
             View sameCandyColumn = parent.getChildAt(parent.getChildCount() - index);
             if (lastInt.equals(sameCandyColumn.getBackground().getColorFilter())) counter++;
             lastInt = sameCandyColumn.getBackground().getColorFilter();
         }
-        return (counter == columns - 1);
+        return (counter >= 3);
     }
 
     // fill each pop with random color
@@ -138,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // when clicking reset
         if (item.getItemId() == R.id.menu_reset) {
-            mainActivity.removeAllViews();
+            clean();
             startGame();
         } else {
             selectLevel();
@@ -177,14 +187,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveUserLevel(int rating) {
+        // set level, start game
+        level = rating;
+        clean();
+        // save in prefs
+        sp.edit().putInt(USER_LEVEL, rating).apply();
+        startGame();
+    }
+
+    private void clean() {
         // remove old pops, custom array
         util.levelColors = null;
         mainActivity.removeAllViews();
-        // save in prefs
-        sp.edit().putInt(USER_LEVEL, rating).apply();
-        // set level, start game
-        level = rating;
-        util.addToArr(rating);
-        startGame();
+        util.addToArr(level);
+        perfectLines = 0;
     }
+
+
 }
